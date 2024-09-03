@@ -1,0 +1,36 @@
+----------------------------------
+Operating Systems Laboratory (CS39002)
+Assignment : 2
+
+Heuristic Report for Squashbug program 
+(squashbug.cpp -> exectuable command sb)
+
+Submitted by:-
+    Group No. : 12 {20CS10041, 20CS30002, 20CS30018, 20CS30058}
+----------------------------------
+
+---- Squashbug working:-
+
+The squashbug program written in squashbug.cpp first constructs a parent vector (pids) of the given process by getting parent pids from /proc/<pid>/stat folders.
+Next, it constructs a process-graph, by updating parents of all active processes in /proc/ folder. Next, Depth First Search is used to traverse the given
+graph and count the number of the children in the subtrees of all active processes. 
+
+---- Heuristic used:
+
+The squashbug analyses the growth in number of child processes a given process has over time:
+
+- First, the squashbug constructs an Initial Graph, by updating parents and running DFS traversal over the process-graph. This graph contains the initial children processes pids in vectors for all running processes.
+
+- Next, the squashbug starts running in iterations (2 to 3): it sleeps for some time, waiting for the trojan process to expand its subtree. When the squashbug wakes up, it updates the process-graph by 
+    traversing over only those processes which have been newly added in the given sleep time.
+
+- Squashbug also maintains a map <int, float> ratio mapping a process pid to the growth in its child processes with time.
+    In each iteration, for each of the parent processes in the initial parent vector (pids), it updates the ratio map with the ratio of a process' current number of children 
+    with the number of children in previous iteration (or in Initial Graph). This way, the squashbug tracks the rate of growth in number of children of a process over time.
+
+- Since a trojan sleeps and reproduces in regular intervals, it will show a drastic increase in the number of child processes over time, and the growth rate would be uniform.
+
+- The squashbug choses all the processes which have a growth rate of more than a set value (eg: ~1.2 or +20% per iteration) and finds the parent with the maximum such growth rate.
+
+- If it finds such a process, it is deemed as a potential trojan. If no processes show a uniform growth in child processes, no potential trojans are found.
+
